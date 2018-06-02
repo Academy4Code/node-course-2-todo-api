@@ -19,7 +19,6 @@ db.collection('Users').findOneAndUpdate({
     {
        "age": 1
     }
-
 },{
   returnOriginal :true
 }).then((result)=>{
