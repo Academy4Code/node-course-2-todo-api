@@ -4,6 +4,7 @@ var bodyParser = require('body-parser');
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
 var {User} = require('./models/user');
+const {ObjectID} = require('mongodb');
 
 var app = express();
 
@@ -29,8 +30,33 @@ app.get('/todos',(req,res)=>{
   Todo.find().then((todos)=>{
     res.send({todos});
   },(e)=>{
-      res.status(400).send(e);    
+      res.status(400).send(e);
   })
+});
+
+app.get('/todos/:id',(req,res)=>{
+  var id =req.params.id;
+  if (!ObjectID.isValid(id)) {
+    res.status(404).send();
+  }
+
+  Todo.findById(id).then((todo)=>{
+    res.send({todo});
+  }).catch((e)=>{
+    res.status(404).send();
+  });
+});
+
+app.delete('/todo/:id',(req,res)=>{
+  var id =req.params.id;
+  if (!ObjectID.isValid(id)) {
+    res.status(404).send();
+    return false;
+  }
+
+  Todo.findByIdAndRemove('5b14b6c87f0f710d2cabb2f3').then((todo)=>{
+    console.log(todo);
+  });
 });
 
 app.listen(27018,()=>{
