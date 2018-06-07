@@ -1,5 +1,18 @@
+var env = process.env.NODE_ENV || 'development';
+console.log("env********",env);
+if (env==='development') {
+  process.env.port=3000;
+  process.env.MONGO_URI = "mongodb://localhost:27017/TodoApp";
+}else if (env==='test') {
+  process.env.port=3000;
+  process.env.MONGO_URI = "mongodb://localhost:27017/TodoAppTest";
+}
+
 var express = require('express');
+const port = process.env.PORT || 27018;
+
 var bodyParser = require('body-parser');
+const _ = require('lodash');
 
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
@@ -47,20 +60,37 @@ app.get('/todos/:id',(req,res)=>{
   });
 });
 
-app.delete('/todo/:id',(req,res)=>{
+app.delete('/todos/:id',(req,res)=>{
   var id =req.params.id;
   if (!ObjectID.isValid(id)) {
     res.status(404).send();
     return false;
   }
 
-  Todo.findByIdAndRemove('5b14b6c87f0f710d2cabb2f3').then((todo)=>{
+  Todo.findByIdAndRemove(id).then((todo)=>{
     console.log(todo);
+      return res.send(todo);
   });
 });
 
-app.listen(27018,()=>{
-  console.log("Started o port 27018");
+//POST users
+app.post('/users',(req,res)=>{
+  var body = _.pick(req.body,['email','password']);
+  console.log(body);
+  var user = new User(body);
+
+
+  user.save().then(()=>{
+    return user.generateAuthToken();
+  }).then((token)=>{
+    res.header('x-auth',token).send(user);
+  }).catch((e)=>{
+    res.status(400).send(e);
+  });
+});
+
+app.listen(port,()=>{
+  console.log(`Started o port ${port}`);
 })
 
 
